@@ -34,15 +34,23 @@ def liste_followers_account(username):
 
 
 def liste_username_followers(username):
-    lst,lst_followers=[],[]
-    lst=liste_followers_account(username)
-    time.sleep(random.randint(5,15))
-    for i in range(len(lst)-1):
-        follower=bot.get_user_id_from_username(lst[i])
-        print(f"utilisateur{follower} est abonne a {username}\n")
-        lst_followers.append(follower)
-        time.sleep(random.randint(1,5))
-    print (f"la liste des followers de {username} est:{lst_followers}")
+    #lst,lst_followers=[],[]
+    #lst=liste_followers_account(username)
+    #time.sleep(random.randint(5,15))
+    followers= liste_followers_account(username)
+    lst=[]
+    for i in followers:
+        #print(bot.get_username_from_user_id(i))
+        lst.append(bot.get_username_from_user_id(i))
+        time.sleep(0.1)
+    
+    
+        #follower=bot.get_user_id_from_username(lst[i])
+        #print(f"utilisateur{follower} est abonne a {username}\n")
+        #lst_followers.append(follower)
+        #time.sleep(random.randint(5,15))
+    print (lst)
+
 
 #suivre tous les comptes qui sont abonnés au compte ciblé qui prend en parametre le nom d'utilisateur et la liste de ses followers
 def following_accounts(username,liste): 
