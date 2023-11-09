@@ -49,7 +49,7 @@ def liste_username_followers(username):
         #print(f"utilisateur{follower} est abonne a {username}\n")
         #lst_followers.append(follower)
         #time.sleep(random.randint(5,15))
-    print (lst)
+    return (lst)
 
 
 #suivre tous les comptes qui sont abonnés au compte ciblé qui prend en parametre le nom d'utilisateur et la liste de ses followers
