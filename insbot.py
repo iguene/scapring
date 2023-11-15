@@ -9,9 +9,9 @@ import random
 from bs4 import BeautifulSoup
 
 
-username = "ibrahima.gnf@gmail.com"
-password = "m5Mey5eydw"
-personne_cible = "ibra.gnf"
+username = input ("identifiant:")
+password = input("\nmot de passe:")
+personne_cible = input("\ncompte cible:")
 
 bot = Bot()
 
@@ -25,6 +25,7 @@ def follow_user(username):
     bot.follow(username)
     print(f"Abonnement à {username} réussi.")
 
+
 def unfollow_user(username):
     bot.unfollow(username)
     print(f"Désabonnement à {username} réussi")
@@ -33,7 +34,7 @@ def liste_followers_account(username):
     return  bot.get_user_followers(username)
 
 
-def liste_username_followers(username):
+def liste_username_followers(username, followers_dict):
     #lst,lst_followers=[],[]
     #lst=liste_followers_account(username)
     #time.sleep(random.randint(5,15))
@@ -42,19 +43,13 @@ def liste_username_followers(username):
     for i in followers:
         #print(bot.get_username_from_user_id(i))
         lst.append(bot.get_username_from_user_id(i))
-        time.sleep(0.1)
-    
-    
-        #follower=bot.get_user_id_from_username(lst[i])
-        #print(f"utilisateur{follower} est abonne a {username}\n")
-        #lst_followers.append(follower)
-        #time.sleep(random.randint(5,15))
-    return (lst)
-
+        time.sleep(random.randint(1,5))
+    followers_dict[username]=lst
+    return followers_dict
 
 #suivre tous les comptes qui sont abonnés au compte ciblé qui prend en parametre le nom d'utilisateur et la liste de ses followers
-def following_accounts(username,liste): 
-    liste=liste_followers_account(username)
+def following_accounts(username,followers_dict): 
+    lst=liste_followers_account(username)
 
 def lst_fll(user,lst):
     
@@ -62,8 +57,29 @@ def lst_fll(user,lst):
     user=bot.get_username_from_user_id(lst)
     return user
 
-# mettre la liste des 
-        
+#fonction qui va suivre tous les followers d'un compte donné qui prend en paramètre le username et la liste de compte à raison de 16
+
+def follow_list_users(username,followers_dict,follow_dict):
+    liste_suivis=[]
+    i=0
+    while i<16:
+        follow_user(followers_dict[username][0])
+        liste_suivis.append(followers_dict[username][0])
+        time.sleep(random.randint(1,10))
+        users_list.remove(followers_dict[username][0])
+        i+=1
+    return liste_suivis,users_list
+
+
+
+
+
+def switch_lists_and_reset_counter(lists, current_list_index, follow_counter):
+    # Fonction pour passer à la liste suivante et réinitialiser le compteur après chaque heure
+    current_list_index = (current_list_index + 1) % len(lists)
+    follow_counter = 0
+    return current_list_index, follow_counter
+
 
 
 if __name__=="__main__":
@@ -80,8 +96,9 @@ if __name__=="__main__":
     #time.sleep(random.randint(5, 15))
     #print(lst)
     #following_accounts(personne_cible,lst)
+    followers_dict={}
     
-    liste_username_followers(personne_cible)
+    print(liste_username_followers(personne_cible,followers_dict))
     
     
     
