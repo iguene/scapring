@@ -45,7 +45,7 @@ def liste_username_followers(username, followers_dict):
     for i in followers:
         #print(bot.get_username_from_user_id(i))
         lst.append(bot.get_username_from_user_id(i))
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1,2))
     followers_dict[username]=lst
     return followers_dict
 
@@ -67,7 +67,7 @@ def follow_list_users(username,followers_dict,follow_dict):
     while i<16:
         follow_user(followers_dict[username][0])
         follow_dict[username].append(followers_dict[username][0])
-        time.sleep(random.randint(1,5))
+        time.sleep(random.randint(1,2))
         followers_dict [username].remove(followers_dict[username][0])
         i+=1
     return follow_dict,followers_dict
@@ -101,6 +101,8 @@ def inc_gsheet(username,followers_dict):
 
 
 
+
+
 if __name__=="__main__":
     login()
     #lst=[]
@@ -119,9 +121,20 @@ if __name__=="__main__":
     follow_dict={}
     
     followers_dict=liste_username_followers(personne_cible,followers_dict)
-    follow_dict,followers_dict=follow_list_users(personne_cible,followers_dict,follow_dict)
-    print (follow_dict)
+    #follow_dict,followers_dict=follow_list_users(personne_cible,followers_dict,follow_dict)
+    #print (follow_dict)
     
+    start_time = time.time()
+    max_duration = 1200  # 20 minutes en secondes
+    while time.time() - start_time < max_duration:
+        follow_dict, followers_dict = follow_list_users(personne_cible, followers_dict, follow_dict)
+        
+        # Attendre avant la prochaine itération si nécessaire
+        if time.time() - start_time < max_duration:
+            time.sleep(random.randint(300, 600))  # Attendre entre 5 et 10 minutes
+    
+    
+    inc_gsheet(personne_cible,followers_dict)
     
     logout()
 
