@@ -1,4 +1,4 @@
-import gsheet #Librairie pour Google Sheet -> FIchier gsheet.py
+import gsheet  #Librairie pour Google Sheet -> FIchier gsheet.py
 from instabot import Bot
 import time
 import random
@@ -8,19 +8,21 @@ import os
 username = "ibrahima.gnf@gmail.com"
 password = "m5Mey5eydw"
 
-os.remove(f"config/{username}_uuid_and_cookie.json")
+if (os.path.exists(f"config/{username}_uuid_and_cookie.json")):
+    os.remove(f"config/{username}_uuid_and_cookie.json")
 
 personne_cible = "simulegal"
 
-
 list_followers = False
 
-if (os.path.exists(f"data/{personne_cible}.txt")):
+if (os.path.exists(f"data/{personne_cible}/followers.txt") and os.path.exists(f"data/{personne_cible}/following.txt")):
     value = input("La liste des followers a été trouvé, voulez-vous RE-lister les followers (cela peut-être long dû au délai entre les requêtes) ? (oui, non): ")
     if (value.startswith("oui")):
         list_followers = True
 else:
-    with open(f"data/{personne_cible}.txt", "w") as f:
+    with open(f"data/{personne_cible}/followers.txt", "w") as f:
+        f.write("FICHIER VIDE !")
+    with open(f"data/{personne_cible}/following.txt", "w") as f:
         f.write("FICHIER VIDE !")
 
 print("[INFO] Get valid proxies...")
@@ -31,43 +33,68 @@ print("[INFO] Proxies got...")
 bot = Bot()
 
 print("[INFO] Login...")
-bot.login(username=username, password=password)
+bot.login(username=username, password=password, ask_for_code=True)
 
 print("CONNEXION Effectuée !")
 
 if (list_followers):
     followers = bot.get_user_followers(personne_cible)
+    following = bot.get_user_following(personne_cible)
 
-    with open(f"data/{personne_cible}.txt", "w") as file:
+    with open(f"data/{personne_cible}/followers.txt", "w") as file:
         for f in followers:
             file.write(f"{f}\n")
-    print(f"[INFO] followers saved in data/{personne_cible}.txt")
+    print(f"[INFO] followers saved in data/{personne_cible}/followers.txt")
+    with open(f"data/{personne_cible}/following.txt", "w") as file:
+        for f in following:
+            file.write(f"{f}\n")
+    print(f"[INFO] following saved in data/{personne_cible}/following.txt")
 else:
-    followers = []
-    with open(f"data/{personne_cible}.txt", "r") as file:
-        followers.append(file.read().split("\n"))
+    with open(f"data/{personne_cible}/followers.txt", "r") as file:
+        followers = file.read().split("\n")
     print("[INFO] followers got in file.")
-
+    with open(f"data/{personne_cible}/following.txt", "r") as file:
+        following = file.read().split("\n")
+    print("[INFO] following got in file.")
 
 nb_followers = len(followers)
 
-
-save_in_sheet = input("Sauvegarder dans Google Sheet ? (oui, non): ")
+save_in_sheet = input("Sauvegarder la liste des followers dans Google Sheet? (oui, non): ")
 
 if (save_in_sheet.startswith("oui")):
-    gsheet.insert_lines([["ID", "USERNAME"]], 1)
-
+    gsheet.clear_sheet()
+    gsheet.insert_lines([["ID", "USERNAME", "YOU_FOLLOW"]], 1)
     i = 2
     for f in followers:
         if bot.check_not_bot(f):
+            you_follow = False
             f_name = bot.get_username_from_user_id(f)
-            gsheet.insert_lines([[f, f_name]], i)
+            if f in following:
+                you_follow = True
+            gsheet.insert_lines([[f, f_name, you_follow]], i)
             i += 1
-            time.sleep(random.randint(0, 4))
+            time.sleep(random.randint(2, 4))
         else:
             print(f"[INFO] SKIP {f} -> Bot detection")
 
+def follow_users(userlist):
+    for f in userlist:
+        bot.follow(f, True)
 
+follow_back_users = input(f"Suivre en retour les followers non suivi (à partir du compte @{username}) sur le GoogleSheet? (oui, non): ")
+
+if (follow_back_users.startswith("oui")):
+    print("[INFO] FOLLOW ALL users...")
+    accounts = gsheet.get_lines()
+    line = 1
+    for user in accounts:
+        if (user[2] == "FALSE"):
+            print(f'FOLLOW {user}') # FOLLOW USER
+            bot.follow(user[0], True)
+            gsheet.update_cells(line, 3, 'VRAI')
+            print("[INFO] Mise en pause (Pas plus de 14 abonnements par heure afin d'éviter les conflits...)")
+            time.sleep(60 * 60 / 14)
+        line += 1
 
 bot.logout()
 print("BYE")
