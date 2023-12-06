@@ -206,5 +206,5 @@ class LinkedinBot():
         self.driver.quit()
 
 if __name__ == "__main__":
-    bot = LinkedinBot("zadigmclebg@gmail.com", "#Azerolip7")
+    bot = LinkedinBot("zadigmclebg@gmail.com", "")
     bot.run()
