@@ -6,8 +6,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from random import *
 import os
 import time
-import json 
-    
+import json
+import gsheet
+
 COOKIES_PATH = 'auth/cookies.json'
 LOCAL_STORAGE_PATH = 'auth/local_storage.json'
 
@@ -15,11 +16,11 @@ class LinkedinBot():
     def __init__(self, username, password, weekly_limit=200) -> None:
         self.user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
         self.options = webdriver.ChromeOptions()
-        self.options.use_chromium = True
+        self.options.use_chromium = False
         self.options.add_argument("start-maximized")
         self.options.page_load_strategy = 'eager' #Ne pas attendre que les images aient totalement finies de charger, non utile
         self.options.add_argument(f"user-agent={self.user_agent}")
-        self.options.add_experimental_option("detach", True)
+        #self.options.add_experimental_option("detach", True)
 
         self.s = 20 #Temps entre les étapes (en secondes)
         self.driver = webdriver.Chrome(options=self.options)
@@ -45,7 +46,7 @@ class LinkedinBot():
     def click_and_wait(self, element, delay=1):
         self.action.move_to_element(element).click().perform()
         time.sleep(delay)
-      
+
     def scroll_to_bottom(self, delay=2):
         last_height = self.driver.execute_script("return document.body.scrollHeight")
         while True:
@@ -80,8 +81,12 @@ class LinkedinBot():
             return False
 
     def navigate_and_check(self, probe_page):
+        print("Try to get Driver...")
         self.driver.get(probe_page)
+        print("Driver got")
+        print("Sleep 15s...")
         time.sleep(15)
+        print("ok !")
         if self.success():
             self.save_data_to_json(self.driver.get_cookies(), COOKIES_PATH)
             self.save_data_to_json({key: self.driver.execute_script(f"return window.localStorage.getItem('{key}');") for key in self.driver.execute_script("return Object.keys(window.localStorage);")}, LOCAL_STORAGE_PATH)
@@ -90,9 +95,12 @@ class LinkedinBot():
             return False
    
     def login(self):
+
         self.wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="username"]'))).send_keys(self.username)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="password"]'))).send_keys(self.password)
         self.action.click(self.wait.until(EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "S’identifier")]')))).perform()
+
+        self.action.click(self.wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="gsi_838850_530161-wrapper"]')))).perform()
         print("Try to login...Sleep 15s")
         time.sleep(15)
         print("Login !")
@@ -100,16 +108,16 @@ class LinkedinBot():
     def check_cookies_and_login(self):
         self.driver.get(self.login_page)
         time.sleep(3)
-        
+    
         if os.path.exists(COOKIES_PATH) and os.path.exists(LOCAL_STORAGE_PATH):
             self.add_cookies(self.load_data_from_json(COOKIES_PATH))
             self.add_local_storage(self.load_data_from_json(LOCAL_STORAGE_PATH))
-            
+            #self.add_cookies(self.load_data_from_json('./test/gcookies.json'))
+            print("Cookies ajoutés !")
             if self.navigate_and_check(self.search_link):
                 return 
             else: 
                 self.delete_folder(self.get_first_folder(COOKIES_PATH))
-        
         self.driver.get(self.login_page)
         time.sleep(3)
         self.login()
@@ -153,6 +161,7 @@ class LinkedinBot():
         for connect_button in connect_buttons:
             person = connect_button.find_element(By.XPATH, './/ancestor::div[@class="entity-result__item"]')
             person_name = person.find_element(By.XPATH, './/span[@aria-hidden="true"]').get_attribute('innerHTML').strip("\n <!---->")
+            gsheet.insert_lines([[f"{person_name}"]])
             self.click_and_wait(connect_button,0.5)
             
             if (self.weekly_counter<self.weekly_limit):
