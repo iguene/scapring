@@ -95,12 +95,10 @@ class LinkedinBot():
             return False
    
     def login(self):
-
         self.wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="username"]'))).send_keys(self.username)
         self.wait.until(EC.element_to_be_clickable((By.XPATH, '//input[@id="password"]'))).send_keys(self.password)
         self.action.click(self.wait.until(EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "S’identifier")]')))).perform()
 
-        self.action.click(self.wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@id="gsi_838850_530161-wrapper"]')))).perform()
         print("Try to login...Sleep 15s")
         time.sleep(15)
         print("Login !")
