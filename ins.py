@@ -19,9 +19,9 @@ from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import Flow
 
 
-username = "ibrahima.gnf@gmail.com"
-password = "m5Mey5eydw"
-personne_cible = "ibra.gnf"
+username = "email"
+password = "XXXXXXXX"
+personne_cible = "idpersonne cible"
 
 bot = Bot()
 
