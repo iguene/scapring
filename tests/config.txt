@@ -1,8 +1,6 @@
-username=ibrahima.gnf@gmail.com
-password=m5Mey5eydw
-username=ibrahima.gnf@gmail.com
-password=m5Mey5eydw
-username=ibrahima.gnf@gmail.com
-password=m5Mey5eydw
-username=ibrahima.gnf@gmail.com
-password=m5Mey5eydw
+username=XXXXXXXXXX@gmail.com
+password=XXXXXXX
+username=XXXXXXXXXX@gmail.com
+password=XXXXXXX
+username=XXXXXXXXXX@gmail.com
+password=XXXXXXX
